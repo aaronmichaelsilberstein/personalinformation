@@ -1,0 +1,48 @@
+%%%%%%%%%%%%%COMMON SETTINGS%%%%%%%%%%%%%%%%%
+\def\standardindent{10pt} % The standard indent for an indented line, when making hbox's
+\def\subindent{20pt}
+\parindent=-10pt \leftskip=20pt % Paragraphs are generally indented 20pt from the left of the page, but the first line indented only 10 points
+\hsize=6.5in % Set the horizontal size of the page.
+\vsize=10in % Set the vertical size of the page.
+\hoffset=0in
+%%%%%%%%%%%%%COMMON MACROS%%%%%%%%%%%%%%%%%%
+\def\pLaTeX{\hbox{(\kern-.1em L\kern-.2em\raise.5ex\hbox{A}\kern-.1667em)\kern-.1emT\kern-.1667em\lower.5ex\hbox{E}\kern-.125em X}} % (LA)TEX with raising and lowering
+%% Now we get some fun with conditionals.  Since macros aren't evaluated until they are invoked, we can use macros that are defined later in our file in macros that appear earlier.  It turns out we don't use this in the current implementation, but we keep them here no matter what.
+\def\ifundef#1{\expandafter\ifx\csname#1\endcsname\relax} % Ex. 7.7 from TTB (The TeXBook).  This one's a bit tricky.  The basic principle is that, if #1 is not defined, then the control sequence \#1 will be interpreted as \relax when spit out by \csname...\endcsname --- This is Knuth's hack for detecting whether a control sequence has already been defined.  \expandafter makes sure the next expandable item (in this case \csname#1\endcsname) is expanded before it allows the \ifx to be evaluated.  This makes it so that: if \#1 is defined, \expandafter\ifx\csname#1\endcsname\relax turns into \ifx\#1\relax; otherwise, it expands to \ifx\relax\relax.  There's a lot that you can do in TeX by being tricky/clever.
+\def\ifdef#1{{\ifundef#1\aftergroup{\iffalse}\else\aftergroup{\iftrue}\fi}} %makes an "if not BLAH" out of "if BLAH".  Can be generalized.
+%%%%%%%%%%%%%%%%RESUME%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%FONT DEFINITIONS%%%%%%%%%%%%%%%%%
+\font\rtitlefont=cmcsc10 scaled\magstep4 % Set the font for resume title
+\font\rheaderfont=cmti10 scaled\magstep2 % Set the font for a resume header
+\font\rminiheaderfont=cmbx10 % Set the font for a field title (so the font of "Name" in "Name: Aaron")
+\font\rtextfont=cmr10 % Set the general text size
+%%%%%%%%%%%%%%LINE STYLES%%%%%%%%%%%%%%%%%%%%
+\def\rtitle{\hbox to\hsize{\hfill \rtitlefont R\'esum\'e\hfill}\rtextfont\strut} % Generate a resume's title, with a pleasing strut of space after (a strut is the platonic ideal of a vertical box for a given font).
+\def\rheader#1{\vskip0pt\strut\vskip0pt\hbox{\rheaderfont #1} \vskip3pt\hrule\strut\vskip0pt} % Generate a resume's section heading.  This is underlined, with struts placed above and below for pleasing space.  This line also demonstrates how to take advantage of TeX's modes: the \vskip0pt's don't insert anything in the layout themselves, but they force a move to vertical mode.  This makes sure everything between the \vskip's are interpreted as boxes to be stacked vertically, so this \vskip is .
+\def\rline#1{\hbox to\hsize{\hskip\standardindent\rtextfont {#1}\hfil}} % hbox to make a single non-header resume line
+\def\rduelingcolumns#1#2{\rline{{#1}\hfill{#2}}} % hbox to fit two fields on the same line, one left-justified, one right-justified
+\def\rentry#1#2{{\rminiheaderfont #1:} {#2}} % Name: Aaron
+
+%%%%%%%%%%%%%%%%%%%%CV%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%FONT DEFINITIONS%%%%%%%%%%%%%%%
+\let\cvtitlefont=\rtitlefont
+\let\cvheaderfont=\rheaderfont
+\let\cvminiheaderfont=\rminiheaderfont
+\let\cvtextfont=\rtextfont
+% At the moment, we're not differentiating so we're not taking advantage of the newly-defined CV font styles
+\def\cvtitle{\hbox to\hsize{\hfill \cvtitlefont Curriculum Vitae\hfill}\cvtextfont\strut}
+\let\cvheader=\rheader
+\let\cvline=\rline
+\let\cvduelingcolumns=\rduelingcolumns
+\let\cventry=\rentry
+\def\cvdateline#1#2{\cvline{#1\dotfill#2}}
+\def\cvsubline#1{\hbox to\hsize{\hskip\subindent\rtextfont {#1}\hfil}} % Like \cvline, but indented 20pt rather than 10pt
+% In a CV, we list things sometimes.
+\newcount\CVlistitemcount
+\def\cvnewlist{\global\CVlistitemcount=0}
+\def\cvlistlabel{{\bf \number\CVlistitemcount.\hskip.3em}}
+\def\cvlistlabelplaceholder{\phantom{\cvlistlabel}}
+\def\cvincrementlistcount{\global\advance\CVlistitemcount by1}
+\def\cvitemline#1{\cvline{\cvincrementlistcount\cvlistlabel #1}}
+\def\cvitemsubline#1{\cvline{\cvlistlabelplaceholder #1}}
+\def\cvsubdescription#1{\vskip0pt\noindent #1 \vskip0pt} % give a non-indented paragraph, and go back into vertical mode
